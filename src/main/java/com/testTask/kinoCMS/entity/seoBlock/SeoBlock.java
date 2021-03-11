@@ -16,10 +16,10 @@ public class SeoBlock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String URL;
-    private String title;
-    private String keywords;
-    private String description;
+    private String seoURL;
+    private String seoTitle;
+    private String seoKeywords;
+    private String seoDescription;
 
     @Override
     public boolean equals(Object o) {

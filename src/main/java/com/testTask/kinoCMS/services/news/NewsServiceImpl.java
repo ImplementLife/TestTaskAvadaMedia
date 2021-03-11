@@ -1,5 +1,6 @@
 package com.testTask.kinoCMS.services.news;
 
+import com.testTask.kinoCMS.entity.image.Image;
 import com.testTask.kinoCMS.entity.news.News;
 import com.testTask.kinoCMS.repositoryes.NewsDao;
 import com.testTask.kinoCMS.repositoryes.files.FileManager;
@@ -19,8 +20,24 @@ public class NewsServiceImpl implements NewsService {
         MultipartFile mainImage = news.getMainImage();
         if (mainImage != null) news.setMainImageName(fileManager.save(mainImage));
 
+        Image[] imagesPaths = new Image[news.getImagesNames().length];
         MultipartFile[] images = news.getImages();
-        if (images != null) news.setImagesNames(fileManager.save(images));
+        if (images != null) {
+            news.setImagesNames(fileManager.save(images));
+            for (int i = 0; i < imagesPaths.length; i++) {
+                imagesPaths[i] = new Image();
+                imagesPaths[i].setName(news.getImagesNames()[i]);
+            }
+            news.setImagesPaths(imagesPaths);
+        }
+    }
+
+    private News initPathImages(News news) {
+        Image[] images = news.getImagesPaths();
+        String[] namesImages = new String[images.length];
+        for (int i = 0; i < images.length; i++) namesImages[i] = images[i].getName();
+        news.setImagesNames(namesImages);
+        return news;
     }
 
     @Override
@@ -51,12 +68,14 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public News getById(Long id) {
-        return newsDao.getOne(id);
+        return initPathImages(newsDao.getOne(id));
     }
 
     @Override
     public Collection<News> getAll() {
-        return newsDao.findAll();
+        Collection<News> result = newsDao.findAll();
+        for (News news : result) initPathImages(news);
+        return result;
     }
 
     public void setFileManager(FileManager fileManager) {

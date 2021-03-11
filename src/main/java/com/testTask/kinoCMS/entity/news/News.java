@@ -1,10 +1,15 @@
 package com.testTask.kinoCMS.entity.news;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.testTask.kinoCMS.entity.image.Image;
 import com.testTask.kinoCMS.entity.seoBlock.SeoBlock;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.IndexColumn;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
@@ -26,18 +31,26 @@ public class News {
     @NotBlank
     private String description;
 
-    @Transient
     @Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Transient
     private MultipartFile mainImage;
 
-    @Transient
     @Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Transient
     private MultipartFile[] images;
 
+    @Hidden
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @IndexColumn(name = "images_id")
+    private Image[] imagesPaths;
+
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @Transient
     private String mainImageName;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @Transient
     private String[] imagesNames;
 
     private String videoURL;

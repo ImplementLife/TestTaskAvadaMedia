@@ -1,5 +1,6 @@
 package com.testTask.kinoCMS.services.movies;
 
+import com.testTask.kinoCMS.entity.image.Image;
 import com.testTask.kinoCMS.entity.movie.Movie;
 import com.testTask.kinoCMS.repositoryes.MovieDao;
 import com.testTask.kinoCMS.repositoryes.files.FileManager;
@@ -20,7 +21,23 @@ public class MovieServiceImpl implements MovieService {
         if (mainImage != null) movie.setMainImageName(fileManager.save(mainImage));
 
         MultipartFile[] images = movie.getImages();
-        if (images != null) movie.setImagesNames(fileManager.save(images));
+        if (images != null) {
+            movie.setImagesNames(fileManager.save(images));
+            Image[] imagesPaths = new Image[movie.getImagesNames().length];
+            for (int i = 0; i < imagesPaths.length; i++) {
+                imagesPaths[i] = new Image();
+                imagesPaths[i].setName(movie.getImagesNames()[i]);
+            }
+            movie.setImagesPaths(imagesPaths);
+        }
+    }
+
+    private Movie initPathImages(Movie movie) {
+        Image[] images = movie.getImagesPaths();
+        String[] namesImages = new String[images.length];
+        for (int i = 0; i < images.length; i++) namesImages[i] = images[i].getName();
+        movie.setImagesNames(namesImages);
+        return movie;
     }
 
     @Override
@@ -51,12 +68,14 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie getById(Long id) {
-        return movieDao.getOne(id);
+        return initPathImages(movieDao.getOne(id));
     }
 
     @Override
     public Collection<Movie> getAll() {
-        return movieDao.findAll();
+        Collection<Movie> result = movieDao.findAll();
+        for (Movie movie : result) initPathImages(movie);
+        return result;
     }
 
     public void setFileManager(FileManager fileManager) {

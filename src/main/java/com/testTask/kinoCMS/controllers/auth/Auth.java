@@ -5,6 +5,7 @@ import com.testTask.kinoCMS.services.UserService;
 import com.testTask.kinoCMS.services.defaultRestData.AlreadyExistException;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,14 @@ public class Auth {
     @Autowired
     private UserService userService;
 
-    @Operation(summary = "Registered new user")
+    @Operation(
+        summary = "Registered new user",
+        description = "Use to create new user",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Will return id new news"),
+            @ApiResponse(responseCode = "400", description = "Will return 'already exist'")
+        }
+    )
     @PostMapping("/registration")
     public ResponseEntity<Object> registration(
             @RequestParam String username,
