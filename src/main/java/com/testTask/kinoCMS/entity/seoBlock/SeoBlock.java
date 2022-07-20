@@ -1,6 +1,5 @@
 package com.testTask.kinoCMS.entity.seoBlock;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "seo_block")
 public class SeoBlock {
-    @Hidden
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

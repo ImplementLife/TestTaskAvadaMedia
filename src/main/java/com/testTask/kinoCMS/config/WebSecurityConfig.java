@@ -1,7 +1,6 @@
 package com.testTask.kinoCMS.config;
 
 import com.testTask.kinoCMS.services.UserService;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

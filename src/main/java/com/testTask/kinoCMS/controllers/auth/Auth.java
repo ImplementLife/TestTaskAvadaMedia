@@ -1,77 +1,52 @@
 package com.testTask.kinoCMS.controllers.auth;
 
+import com.testTask.kinoCMS.controllers.dto.RegistrationDTO;
 import com.testTask.kinoCMS.entity.user.User;
 import com.testTask.kinoCMS.services.UserService;
 import com.testTask.kinoCMS.services.defaultRestData.AlreadyExistException;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.naming.AuthenticationException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@Tag(name = "Auth")
 public class Auth {
-
     @Autowired
     private UserService userService;
 
-    @Operation(
-        summary = "Registered new user",
-        description = "Use to create new user",
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Will return id new news"),
-            @ApiResponse(responseCode = "400", description = "Will return 'already exist'")
-        }
-    )
-    @PostMapping("/registration")
-    public ResponseEntity<Object> registration(
-            @RequestParam String username,
-            @RequestParam String password,
-            @RequestParam String passwordConfirm
-    ) {
-        if (!password.equals(passwordConfirm)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Passwords not equals");
-        }
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setPasswordConfirm(passwordConfirm);
+    @PostMapping(name = "/registration")
+    public ResponseEntity<Object> registration(@RequestBody RegistrationDTO data) {
         try {
-            userService.create(user);
+            Map<String, Object> response = new HashMap<>();
+            User user = userService.register(data);
+            response.put("id", user.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (AlreadyExistException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with this username already exist.");
+            return ResponseEntity.ok("User with this username already exist.");
+        } catch (AuthenticationException e) {
+            return ResponseEntity.ok(e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Operation(summary = "Login")
-    @PostMapping("/login")
-    public void login(@RequestParam String username, @RequestParam String password) {}
+    @PostMapping("/user")
+    public ResponseEntity<Object> login(@RequestParam String username) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.loadUserByUsername(username));
+    }
 
-    @Operation(summary = "Logout")
-    @PostMapping("/logout")
-    public void logout() {}
-
-    @Hidden
     @PostMapping("/login-success")
     public ResponseEntity<String> loginSuccess() {
         return ResponseEntity.ok().body("Login success");
     }
 
-    @Hidden
     @PostMapping("/login-fail")
     public ResponseEntity<String> loginFail() {
         return ResponseEntity.ok().body("Username or password is wrong");
     }
 
-    @Hidden
     @GetMapping("/logout-success")
     public ResponseEntity<String> logoutSuccess() {
         return ResponseEntity.ok().body("Logout success");

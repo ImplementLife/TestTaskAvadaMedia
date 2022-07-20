@@ -1,69 +1,84 @@
 package com.testTask.kinoCMS.entity.movie;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.testTask.kinoCMS.entity.image.Image;
 import com.testTask.kinoCMS.entity.seoBlock.SeoBlock;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.IndexColumn;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "movies")
-@Schema(name = "Movie")
 public class Movie {
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    //region Primitive
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String name;
-    @NotBlank
+
+    @Column(columnDefinition="TEXT")
     private String description;
 
-    @Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
-    @Transient
-    private MultipartFile mainImage;
+    private Date dateCreate;
 
-    @Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
-    @Transient
-    private MultipartFile[] images;
+    private Date dateUpdate;
 
-    @Hidden
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @IndexColumn(name = "images_id")
-    private Image[] imagesPaths;
+    private Date datePublic;
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    @Transient
+    private Date dateHide;
+
     private String mainImageName;
-
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    @Transient
-    private String[] imagesNames;
 
     private String trailerURL;
 
-    private boolean type2d;
-    private boolean type3d;
-    private boolean typeIMAX;
+    private boolean showInMain;
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    //endregion
+
+    //region Mappings
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Status status;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @OrderColumn(name = "id")
+    private List<Tag> tags;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "id")
+    private List<Session> sessions;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "id")
+    private Image[] imagesPaths;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "seo_block_id")
     private SeoBlock seoBlock;
 
+    //endregion
 
+    //region Transient
+    @Transient
+    private MultipartFile mainImage;
+
+    @Transient
+    private MultipartFile[] images;
+
+    @Transient
+    private String[] imagesNames;
+
+    //endregion
+
+    //region Object methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,4 +94,7 @@ public class Movie {
     public int hashCode() {
         return this.id.hashCode();
     }
+
+    //endregion
+
 }
